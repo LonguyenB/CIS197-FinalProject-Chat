@@ -1,0 +1,9 @@
+{
+  "name": "finalproject_chatroom",
+  "version": "1.0.0",
+  "description": "A chatroom through the browser using socket.io, node.js",
+  "dependencies": {
+  	"express": "",
+  	"socket.io": ""
+  }
+}

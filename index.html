@@ -1,0 +1,125 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script>
+  var socket = io.connect('http://localhost:3000');
+
+  socket.on('connect', function(){
+    socket.emit('newUser', prompt("What's your name?"));
+  });
+
+  socket.on('usedName', function() {
+    socket.emit('newUser', prompt("Name already taken, what's your name?"));
+  });
+
+  socket.on('userConnected', function() {
+    socket.emit('newUser', prompt("User already connected, what's your name?"));
+  });
+
+  socket.on('needPassword', function() {
+    socket.emit('givePassword', prompt("Password"));
+  });
+
+  socket.on('createPassword', function() {
+    socket.emit('newPassword', prompt("New password"));
+  });
+
+  socket.on('wrongPassword', function() {
+    socket.emit('givePassword', prompt("Wrong password, please enter correct password"));
+  });
+
+  socket.on('updateChat', function (username, msg) {
+    $('#chat').append('<b>'+username + ':</b> ' + msg + '<br>');
+  });
+
+  socket.on('updateUsers', function(data) {
+    $('#users').empty();
+    $.each(data, function(key, value) {
+      $('#users').append('<div>' + key + '</div>');
+    });
+  });
+
+   socket.on('image', sendImage);
+
+   socket.on('video', sendVideo);
+
+   socket.on('audio', sendAudio);
+
+   function sendImage (from, file) {
+    $('#chat').append('<b>' + from + '<img src="' + file + '"/>');
+   }
+   function sendVideo (from, file) {
+    $('#chat').append('<b>' + from + '<video controls src="' + file + '"/>');
+   }
+   function sendAudio (from, file) {
+    $('#chat').append('<b>' + from + '<audio controls src="' + file + '"/>');
+   }
+
+  $(function(){
+    // send message when clicking send button
+    $('#sendData').click( function() {
+      var message = $('#data').val();
+      $('#data').val('');
+      $('#data').focus();
+      socket.emit('sendMessage', message); 
+    });
+
+    // send message when hitting enter
+    $('#data').keypress(function(e) {
+      if(e.which == 13) {
+        $('#sendData').focus().click();
+        $('#data').focus();
+      }
+    });
+
+    $('#uploadImage').bind('change', function(e){
+      var data = e.originalEvent.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(event){
+        socket.emit('image', event.target.result);
+      };
+      reader.readAsDataURL(data);
+    });
+
+    $('#uploadVideo').bind('change', function(e){
+      var data = e.originalEvent.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(event){
+        socket.emit('video', event.target.result);
+      };
+      reader.readAsDataURL(data);
+    });
+
+    $('#uploadAudio').bind('change', function(e){
+      var data = e.originalEvent.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(event){
+        socket.emit('audio', event.target.result);
+      };
+      reader.readAsDataURL(data);
+    });
+
+  });
+
+  window.reset = function (e) {
+    e.wrap('<form>').closest('form').get(0).reset();
+    e.unwrap();
+}
+</script>
+
+<div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+  <b>USERS</b>
+  <div id="users"></div>
+</div>
+<div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
+  <div id="chat"></div>
+  <input id="data" type="text" style="width:200px;" />
+  <input type="button" id="sendData" value="send" />
+
+  <form>
+  <div class="filebutton">Send Image <input type="file" id="uploadImage" accept="image/*"></div>
+  <div class="filebutton">Send Video <input type="file" id="uploadVideo" accept="video/*"></div>
+  <div class="filebutton">Send Audio <input type="file" id="uploadAudio" accept="audio/*"></div>
+  </form>
+
+  <button onclick="reset($('#uploadImage')); reset($('#uploadVideo')); reset($('#uploadAudio'))">Reset file</button>
+</div>
