@@ -4,6 +4,8 @@
   "description": "A chatroom through the browser using socket.io, node.js",
   "dependencies": {
   	"express": "",
-  	"socket.io": ""
+  	"socket.io": "",
+  	"gulp": "",
+  	"gulp-eslint": ""
   }
 }

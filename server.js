@@ -1,8 +1,8 @@
-var express = require('express'), 
-app = express(), 
-http = require('http'), 
-server = http.createServer(app), 
-io = require('socket.io').listen(server);
+var express = require('express');
+var app = express();
+var http = require('http');
+var server = http.createServer(app); 
+var io = require('socket.io').listen(server);
 
 server.listen(3000);
 
@@ -28,19 +28,19 @@ io.sockets.on('connection', function (socket) {
     io.sockets.emit('video', socket.username, data);
   });
 
-  socket.on('audio', function(data) {
+  socket.on('audio', function (data) {
     io.sockets.emit('audio', socket.username, data);
   });
 
   //when a new user is connecting, needs to check if there's already a user
   // of the same name, if there is need a password and also check
   // if user is already connected, if not can't connect
-  socket.on('newUser', function(username){
+  socket.on('newUser', function (username) {
     var used = false;
     var connected = false;
 
     if (userPass.hasOwnProperty(username)) {
-       used = true;
+      used = true;
     }
     var currentUsers = Object.keys(usernames);
     var pos = currentUsers.indexOf(username);
@@ -53,7 +53,7 @@ io.sockets.on('connection', function (socket) {
     if (!connected) {
       if (!used) {
         usernames[username] = username;
-        userPass[username] = "";
+        userPass[username] = '';
         socket.emit('createPassword');
       } else {
         socket.emit('needPassword');
@@ -65,9 +65,9 @@ io.sockets.on('connection', function (socket) {
 
   // creates a new user - adds to object and sets the password
   // and puts the person in the current users
-  socket.on('newPassword', function(password) {
+  socket.on('newPassword', function (password) {
     if (userPass.hasOwnProperty(socket.username)) {
-       userPass[socket.username] = password;
+      userPass[socket.username] = password;
     }
 
     socket.emit('updateChat', 'SERVER', 'you have connected');
@@ -76,7 +76,7 @@ io.sockets.on('connection', function (socket) {
   });
 
   // get a password and check if the password is correct for the user
-  socket.on('givePassword', function(password) {
+  socket.on('givePassword', function (password) {
     if (userPass.hasOwnProperty(socket.username)) {
       if (userPass[socket.username] === password) {
         usernames[socket.username] = socket.username;
@@ -89,7 +89,7 @@ io.sockets.on('connection', function (socket) {
     }
   });
 
-  socket.on('disconnect', function(){
+  socket.on('disconnect', function () {
     delete usernames[socket.username];
     io.sockets.emit('updateUsers', usernames);
     socket.broadcast.emit('updateChat', 'SERVER', socket.username + ' has disconnected');
